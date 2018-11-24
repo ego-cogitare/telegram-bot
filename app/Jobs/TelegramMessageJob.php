@@ -40,7 +40,7 @@ class TelegramMessageJob implements ShouldQueue
     {
         $result = Request::sendMessage([
             'chat_id' => env('TELEGRAM_BOT_CHAT_ID'),
-            'text' => $this->payload['me0ssage'],
+            'text' => $this->payload['message'],
         ]);
 
         if ($result->isOk()) {
