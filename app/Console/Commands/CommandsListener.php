@@ -12,16 +12,16 @@ use TelegramBot\TelegramBotManager\Exception\InvalidParamsException;
 use Longman\TelegramBot\Request;
 
 /**
- * Class BotListener
+ * Class CommandsListener
  * @package App\Console\Commands
  */
-class BotListener extends Command
+class CommandsListener extends Command
 {
     /**
      * The name and signature of the console command.
      * @var string
      */
-    protected $signature = 'bot:manager';
+    protected $signature = 'commands:listener';
 
     /**
      * The console command description.
