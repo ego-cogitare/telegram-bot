@@ -20,7 +20,8 @@ class TelegramServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(Telegram::class, function ($app) {
-            return new Telegram(env('TELEGRAM_BOT_TOKEN'), env('TELEGRAM_BOT_NAME'));
+            $telegram = new Telegram(env('TELEGRAM_BOT_TOKEN'), env('TELEGRAM_BOT_NAME'));
+            return $telegram;
         });
     }
 }
