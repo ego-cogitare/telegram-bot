@@ -9,7 +9,7 @@ use App\Services\Interfaces\IMarketsApi;
  * Class MarketsApi
  * @package App\Services
  */
-class MarketsApi extends ServiceProvider implements IMarketsApi
+class MarketsApi implements IMarketsApi
 {
     /**
      * @var string
