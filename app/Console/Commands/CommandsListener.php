@@ -11,6 +11,7 @@ use TelegramBot\TelegramBotManager\Exception\InvalidActionException;
 use TelegramBot\TelegramBotManager\Exception\InvalidParamsException;
 use Longman\TelegramBot\Request;
 use App\Services\MarketsApi;
+use App\Helpers\TextTable;
 
 /**
  * Class CommandsListener
@@ -29,6 +30,11 @@ class CommandsListener extends Command
      * @var string
      */
     protected $description = 'Send test message';
+
+    /**
+     * @var TextTable|null
+     */
+    protected $textTable = null;
 
 
     /**
@@ -50,6 +56,9 @@ class CommandsListener extends Command
      */
     public function handle(MarketsApi $marketsApi)
     {
+        /** @var TextTable textTable */
+        $this->textTable = new TextTable();
+
         try {
             $bot = new BotManager([
                 'api_key' => env('TELEGRAM_BOT_TOKEN'),
@@ -69,11 +78,9 @@ class CommandsListener extends Command
                 'password' => env('DB_PASSWORD'),
                 'database' => env('DB_DATABASE'),
             ]);
-            $bot->setCustomGetUpdatesCallback(function($updates) use ($marketsApi) {
+            $bot->setCustomGetUpdatesCallback(function ($updates) use ($marketsApi) {
                 /** @var \Longman\TelegramBot\Entities\ServerResponse $updates */
                 foreach ($updates->getResult() as $command) {
-		    $message = '';
-
                     /** @var \Longman\TelegramBot\Entities\Update $command */
                     $args = preg_split('~\s+~', $command->getMessage()->getText());
 
@@ -85,8 +92,7 @@ class CommandsListener extends Command
                                 . '/markets - get markets list' . PHP_EOL
                                 . '/balance <market> <symbol> - get balance for specified market and symbol' . PHP_EOL
                                 . '/balances <market> - get all balances for specified market' . PHP_EOL
-                                . '/orders <active|history/N> - get list of active or last N orders' . PHP_EOL
-                            ;
+                                . '/orders <active|history/N> - get list of active or last N orders' . PHP_EOL;
                             break;
 
                         case '/ping':
@@ -97,20 +103,35 @@ class CommandsListener extends Command
                         case '/balances':
                         case '/markets':
                         case '/orders':
+                            $message = [];
                             $result = json_decode($marketsApi->call($args), true);
-				foreach ($result['data']['total'] as $symbol => $amount) {
-				    if ($amount == 0 && $result['data']['free'][$symbol] == 0) {
-					continue;
-				    }
-		    		    $message .= sprintf("%s %.8f (%.8f)\n", $symbol, $amount, $result['data']['free'][$symbol]);
-			    }
+                            foreach ($result['data']['total'] as $symbol => $amount) {
+                                if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
+                                    continue;
+                                }
+                                $message[] = [
+                                    'symbol' => $symbol,
+                                    'amount' => $amount,
+                                    'used' => $result['data']['used'][$symbol],
+                                    'free' => $result['data']['free'][$symbol],
+                                ];
+                            }
                             break;
-
                         default:
                             $message = sprintf('Unknown command "%s".' . PHP_EOL . 'Please use "/help" command to display possible commands list', $args[0]);
                     }
+
+                    /** Convert response to text table */
+                    if (gettype($message) === 'array') {
+                        $this->textTable->setRows($message);
+                        $message = sprintf('<pre>%s</pre>', $this->textTable->showHeaders(true)
+                            . $this->textTable->render(true));
+                    }
+
+                    /** Send message to telegram */
                     $this->sendMessage($message);
                 }
+
                 return '';
             });
 
