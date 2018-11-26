@@ -98,13 +98,11 @@ class CommandsListener extends Command
                         case '/markets':
                         case '/orders':
                             $result = json_decode($marketsApi->call($args), true);
-			    if (!empty($result['data']['info'])) {
-				foreach ($result['data']['info'] as $info) {
-				    if ($info['balance'] == 0 && $info['locked'] == 0) {
+				foreach ($result['data']['total'] as $symbol => $amount) {
+				    if ($amount == 0 && $result['data']['free'][$symbol] == 0) {
 					continue;
 				    }
-		    		    $message .= sprintf("%s %.8f (%.8f)\n", strtoupper($info['currency']), $info['balance'], $info['locked']);
-				}
+		    		    $message .= sprintf("%s %.8f (%.8f)\n", $symbol, $amount, $result['data']['free'][$symbol]);
 			    }
                             break;
 
