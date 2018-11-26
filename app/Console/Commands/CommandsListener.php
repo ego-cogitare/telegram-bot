@@ -117,7 +117,7 @@ class CommandsListener extends Command
                                         $message[] = [
                                             'date' => date('d.m H:i:s', $order['timestamp'] / 1000),
                                             'symbol' => $order['symbol'],
-                                            'side' => $order['side'],
+                                            't' => substr($order['side'], 0, 1),
                                             'amount' => sprintf('%.8f', preg_match('~(USD|USDT|UAH|NZDT)$~', $order['symbol']) ? $order['amount'] : $order['cost']),
                                         ];
                                     }
@@ -126,7 +126,7 @@ class CommandsListener extends Command
                                 }
                             } else {
                                 $message = '';
-                                $result = json_decode($marketsApi->call(['orders']), true);
+                                $result = json_decode($marketsApi->call(['markets']), true);
                                 foreach ($result['data'] as $market) {
                                     $message .= sprintf("/orders@%s\n", $market);
                                 }
