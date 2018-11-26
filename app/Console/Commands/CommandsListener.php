@@ -47,7 +47,7 @@ class CommandsListener extends Command
         return Request::sendMessage([
             'chat_id' => env('TELEGRAM_BOT_CHAT_ID'),
             'text' => $message,
-'parse_mode' => 'HTML',
+            'parse_mode' => 'HTML',
         ]);
     }
 
@@ -83,10 +83,10 @@ class CommandsListener extends Command
                 /** @var \Longman\TelegramBot\Entities\ServerResponse $updates */
                 foreach ($updates->getResult() as $command) {
                     /** @var \Longman\TelegramBot\Entities\Update $command */
-                    $args = preg_split('~\s+~', $command->getMessage()->getText());
+                    $args = preg_split('~(\s+|/|@)~', trim($command->getMessage()->getText(), '/'));
 
                     switch ($args[0]) {
-                        case '/help':
+                        case 'help':
                             $message = 'Available commands list:' . PHP_EOL
                                 . '/ping - check bot heartbeat' . PHP_EOL
                                 . '/help - show this help' . PHP_EOL
@@ -96,25 +96,33 @@ class CommandsListener extends Command
                                 . '/orders <active|history/N> - get list of active or last N orders' . PHP_EOL;
                             break;
 
-                        case '/ping':
+                        case 'ping':
                             $message = 'pong';
                             break;
 
-                        case '/balance':
-                        case '/balances':
-                        case '/markets':
-                        case '/orders':
-                            $message = [];
-                            $result = json_decode($marketsApi->call($args), true);
-                            foreach ($result['data']['total'] as $symbol => $amount) {
-                                if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
-                                    continue;
+                        case 'balance':
+                        case 'orders':
+                        case 'markets':
+                        case 'balances':
+                            if (isset($args[1])) {
+                                $message = [];
+                                $result = json_decode($marketsApi->call($args), true);
+                                foreach ($result['data']['total'] as $symbol => $amount) {
+                                    if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
+                                        continue;
+                                    }
+                                    $message[] = [
+                                        'symbol' => $symbol,
+                                        'total' => sprintf('%.8f', $amount),
+                                        'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
+                                    ];
                                 }
-                                $message[] = [
-                                    'symbol' => $symbol,
-                                    'total' => sprintf('%.8f', $amount),
-                                    'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
-                                ];
+                            } else {
+                                $message = '';
+                                $result = json_decode($marketsApi->call(['markets']), true);
+                                foreach ($result['data'] as $market) {
+                                    $message .= sprintf("/balances@%s\n\n", $market);
+                                }
                             }
                             break;
                         default:
