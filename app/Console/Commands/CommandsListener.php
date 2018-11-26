@@ -10,6 +10,7 @@ use TelegramBot\TelegramBotManager\BotManager;
 use TelegramBot\TelegramBotManager\Exception\InvalidActionException;
 use TelegramBot\TelegramBotManager\Exception\InvalidParamsException;
 use Longman\TelegramBot\Request;
+use App\Services\MarketsApi;
 
 /**
  * Class CommandsListener
@@ -44,10 +45,10 @@ class CommandsListener extends Command
     }
 
     /**
-     * @param Telegram $telegram
+     * @param MarketsApi $marketsApi
      * @throws \Exception
      */
-    public function handle()
+    public function handle(MarketsApi $marketsApi)
     {
         try {
             $bot = new BotManager([
@@ -68,7 +69,7 @@ class CommandsListener extends Command
                 'password' => env('DB_PASSWORD'),
                 'database' => env('DB_DATABASE'),
             ]);
-            $bot->setCustomGetUpdatesCallback(function($updates) {
+            $bot->setCustomGetUpdatesCallback(function($updates) use ($marketsApi) {
                 /** @var \Longman\TelegramBot\Entities\ServerResponse $updates */
                 foreach ($updates->getResult() as $command) {
                     /** @var \Longman\TelegramBot\Entities\Update $command */
@@ -82,7 +83,7 @@ class CommandsListener extends Command
                                 . '/markets - get markets list' . PHP_EOL
                                 . '/balance <market> <symbol> - get balance for specified market and symbol' . PHP_EOL
                                 . '/balances <market> - get all balances for specified market' . PHP_EOL
-                                . '/orders <active|history:n> - get list of active or last N orders' . PHP_EOL
+                                . '/orders <active|history/N> - get list of active or last N orders' . PHP_EOL
                             ;
                             break;
 
@@ -90,12 +91,11 @@ class CommandsListener extends Command
                             $message = 'pong';
                             break;
 
+                        case '/balance':
+                        case '/balances':
                         case '/markets':
-                            $message = 'CRYPTOPIA' . PHP_EOL
-                                . 'KUNA' . PHP_EOL
-                                . 'LIVECOIN' . PHP_EOL
-                                . 'BINANCE' . PHP_EOL
-                            ;
+                        case '/orders':
+                            $message = $marketsApi->call($args);
                             break;
 
                         default:
