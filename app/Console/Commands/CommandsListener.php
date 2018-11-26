@@ -109,19 +109,27 @@ class CommandsListener extends Command
                             break;
 
                         case 'orders':
-                            $message = [];
-                            $result = json_decode($marketsApi->call($args), true);
-                            if ($result['success']) {
-                                foreach ($result['data'] as $order) {
-                                    $message[] = [
-                                        'date' => date('H:i:s', $order['timestamp'] / 1000),
-                                        'symbol' => $order['symbol'],
-                                        'side' => $order['side'],
-                                        'amount' => sprintf('%.8f', preg_match('~(USD|USDT|UAH|NZDT)$~', $order['symbol']) ? $order['amount'] : $order['cost']),
-                                    ];
+                            if (isset($args[1])) {
+                                $message = [];
+                                $result = json_decode($marketsApi->call($args), true);
+                                if ($result['success']) {
+                                    foreach ($result['data'] as $order) {
+                                        $message[] = [
+                                            'date' => date('d.m H:i:s', $order['timestamp'] / 1000),
+                                            'symbol' => $order['symbol'],
+                                            'side' => $order['side'],
+                                            'amount' => sprintf('%.8f', preg_match('~(USD|USDT|UAH|NZDT)$~', $order['symbol']) ? $order['amount'] : $order['cost']),
+                                        ];
+                                    }
+                                } else {
+                                    $message = $result['message'];
                                 }
                             } else {
-                                $message = $result['message'];
+                                $message = '';
+                                $result = json_decode($marketsApi->call(['orders']), true);
+                                foreach ($result['data'] as $market) {
+                                    $message .= sprintf("/orders@%s\n", $market);
+                                }
                             }
                             break;
 
