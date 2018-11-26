@@ -123,7 +123,7 @@ class TextTable
 
         if ($return) {
             $contents = ob_get_contents();
-            ob_end_clean();
+//            ob_end_clean();
             return $contents;
         }
     }

@@ -47,6 +47,7 @@ class CommandsListener extends Command
         return Request::sendMessage([
             'chat_id' => env('TELEGRAM_BOT_CHAT_ID'),
             'text' => $message,
+'parse_mode' => 'HTML',
         ]);
     }
 
@@ -111,9 +112,8 @@ class CommandsListener extends Command
                                 }
                                 $message[] = [
                                     'symbol' => $symbol,
-                                    'amount' => $amount,
-                                    'used' => $result['data']['used'][$symbol],
-                                    'free' => $result['data']['free'][$symbol],
+                                    'total' => sprintf('%.8f', $amount),
+                                    'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
                                 ];
                             }
                             break;
