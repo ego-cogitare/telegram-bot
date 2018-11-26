@@ -87,22 +87,45 @@ class CommandsListener extends Command
 
                     switch ($args[0]) {
                         case 'help':
-                            $message = 'Available commands list:' . PHP_EOL
+                            $message = '<b>Available commands list:</b>' . PHP_EOL
                                 . '/ping - check bot heartbeat' . PHP_EOL
                                 . '/help - show this help' . PHP_EOL
                                 . '/markets - get markets list' . PHP_EOL
-                                . '/balance <market> <symbol> - get balance for specified market and symbol' . PHP_EOL
-                                . '/balances <market> - get all balances for specified market' . PHP_EOL
-                                . '/orders <active|history/N> - get list of active or last N orders' . PHP_EOL;
+                                . '/balance market symbol - get balance for specified market and symbol' . PHP_EOL
+                                . '/balances market - get all balances for specified market' . PHP_EOL
+                                . '/orders active|history amount - get list of active or last N orders' . PHP_EOL;
                             break;
 
                         case 'ping':
                             $message = 'pong';
                             break;
 
-                        case 'balance':
-                        case 'orders':
                         case 'markets':
+                            $message = '';
+                            $result = json_decode($marketsApi->call($args), true);
+                            foreach ($result['data'] as $market) {
+                                $message .= sprintf("%s\n", $market);
+                            }
+                            break;
+
+                        case 'orders':
+                            $message = [];
+                            $result = json_decode($marketsApi->call($args), true);
+                            if ($result['success']) {
+                                foreach ($result['data'] as $order) {
+                                    $message[] = [
+                                        'date' => date('H:i:s', $order['timestamp'] / 1000),
+                                        'symbol' => $order['symbol'],
+                                        'side' => $order['side'],
+                                        'amount' => sprintf('%.8f', preg_match('~(USD|USDT|UAH|NZDT)$~', $order['symbol']) ? $order['amount'] : $order['cost']),
+                                    ];
+                                }
+                            } else {
+                                $message = $result['message'];
+                            }
+                            break;
+
+                        case 'balance':
                         case 'balances':
                             if (isset($args[1])) {
                                 $message = [];
@@ -121,10 +144,11 @@ class CommandsListener extends Command
                                 $message = '';
                                 $result = json_decode($marketsApi->call(['markets']), true);
                                 foreach ($result['data'] as $market) {
-                                    $message .= sprintf("/balances@%s\n\n", $market);
+                                    $message .= sprintf("/balances@%s\n", $market);
                                 }
                             }
                             break;
+
                         default:
                             $message = sprintf('Unknown command "%s".' . PHP_EOL . 'Please use "/help" command to display possible commands list', $args[0]);
                     }
