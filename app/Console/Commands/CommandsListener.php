@@ -72,6 +72,8 @@ class CommandsListener extends Command
             $bot->setCustomGetUpdatesCallback(function($updates) use ($marketsApi) {
                 /** @var \Longman\TelegramBot\Entities\ServerResponse $updates */
                 foreach ($updates->getResult() as $command) {
+		    $message = '';
+
                     /** @var \Longman\TelegramBot\Entities\Update $command */
                     $args = preg_split('~\s+~', $command->getMessage()->getText());
 
@@ -95,7 +97,15 @@ class CommandsListener extends Command
                         case '/balances':
                         case '/markets':
                         case '/orders':
-                            $message = $marketsApi->call($args);
+                            $result = json_decode($marketsApi->call($args), true);
+			    if (!empty($result['data']['info'])) {
+				foreach ($result['data']['info'] as $info) {
+				    if ($info['balance'] == 0 && $info['locked'] == 0) {
+					continue;
+				    }
+		    		    $message .= sprintf("%s %.8f (%.8f)\n", strtoupper($info['currency']), $info['balance'], $info['locked']);
+				}
+			    }
                             break;
 
                         default:
