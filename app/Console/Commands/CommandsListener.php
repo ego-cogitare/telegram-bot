@@ -92,7 +92,7 @@ class CommandsListener extends Command
                                 . '/ping - check bot heartbeat' . PHP_EOL
                                 . '/help - show this help' . PHP_EOL
                                 . '/markets - get markets list' . PHP_EOL
-                                . '/balance market symbol - get balance for specified market and symbol' . PHP_EOL
+                                . '/convert market - show all existing funds converted to each available quote coin' . PHP_EOL
                                 . '/balances market - get all balances for specified market' . PHP_EOL
                                 . '/orders active|history amount - get list of active or last N orders' . PHP_EOL;
                             break;
@@ -104,9 +104,13 @@ class CommandsListener extends Command
                         case 'm':
                         case 'markets':
                             $message = '';
-                            $result = json_decode($marketsApi->call($args), true);
-                            foreach ($result['data'] as $market) {
-                                $message .= sprintf("%s\n", $market);
+                            try {
+                                $result = json_decode($marketsApi->call($args), true);
+                                foreach ($result['data'] as $market) {
+                                    $message .= sprintf("%s\n", $market);
+                                }
+                            } catch (\Exception $e) {
+                                $message = '#error' . PHP_EOL . $e->getMessage();
                             }
                             break;
 
@@ -114,18 +118,22 @@ class CommandsListener extends Command
                         case 'orders':
                             if (isset($args[1])) {
                                 $message = [];
-                                $result = json_decode($marketsApi->call($args), true);
-                                if ($result['success']) {
-                                    foreach ($result['data'] as $order) {
-                                        $message[] = [
-                                            'date' => date('d.m H:i:s', $order['timestamp'] / 1000),
-                                            'symbol' => $order['symbol'],
-                                            't' => substr($order['side'], 0, 1),
-                                            'amount' => sprintf('%.8f', preg_match('~(USD|USDT|UAH|NZDT)$~', $order['symbol']) ? $order['amount'] : $order['cost']),
-                                        ];
+                                try {
+                                    $result = json_decode($marketsApi->call($args), true);
+                                    if ($result['success']) {
+                                        foreach ($result['data'] as $order) {
+                                            $message[] = [
+                                                'date' => date('d.m H:i:s', $order['timestamp'] / 1000),
+                                                'symbol' => $order['symbol'],
+                                                't' => substr($order['side'], 0, 1),
+                                                'amount' => sprintf('%.8f', preg_match('~(USD|USDT|UAH|NZDT)$~', $order['symbol']) ? $order['amount'] : $order['cost']),
+                                            ];
+                                        }
+                                    } else {
+                                        $message = $result['message'];
                                     }
-                                } else {
-                                    $message = $result['message'];
+                                } catch (\Exception $e) {
+                                    $message = '#error' . PHP_EOL . $e->getMessage();
                                 }
                             } else {
                                 $message = '';
@@ -136,24 +144,56 @@ class CommandsListener extends Command
                             }
                             break;
 
+                        case 'c':
+                        case 'convert':
+                            if (isset($args[1])) {
+                                $message = [];
+                                try {
+                                    $result = json_decode($marketsApi->call($args), true);
+                                    if ($result['success']) {
+                                        foreach ($result['data'] as $symbol => $amount) {
+                                            $message[] = [
+                                                'symbol' => $symbol,
+                                                'amount' => sprintf('%.8f', $amount),
+                                            ];
+                                        }
+                                    } else {
+                                        $message = $result['message'];
+                                    }
+                                } catch (\Exception $e) {
+                                    $message = '#error' . PHP_EOL . $e->getMessage();
+                                }
+                            } else {
+                                $message = '';
+                                $result = json_decode($marketsApi->call(['markets']), true);
+                                foreach ($result['data'] as $market) {
+                                    $message .= sprintf("/convert@%s\n", $market);
+                                }
+                            }
+                            break;
+
                         case 'b':
                         case 'balances':
                             if (isset($args[1])) {
                                 $message = [];
-                                $result = json_decode($marketsApi->call($args), true);
-                                if ($result['success']) {
-                                    foreach ($result['data']['total'] as $symbol => $amount) {
-                                        if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
-                                            continue;
+                                try {
+                                    $result = json_decode($marketsApi->call($args), true);
+                                    if ($result['success']) {
+                                        foreach ($result['data']['total'] as $symbol => $amount) {
+                                            if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
+                                                continue;
+                                            }
+                                            $message[] = [
+                                                'symbol' => $symbol,
+                                                'total' => sprintf('%.8f', $amount),
+                                                'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
+                                            ];
                                         }
-                                        $message[] = [
-                                            'symbol' => $symbol,
-                                            'total' => sprintf('%.8f', $amount),
-                                            'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
-                                        ];
+                                    } else {
+                                        $message = $result['message'];
                                     }
-                                } else {
-                                    $message = $result['message'];
+                                } catch (\Exception $e) {
+                                    $message = '#error' . PHP_EOL . $e->getMessage();
                                 }
                             } else {
                                 $message = '';
