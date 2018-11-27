@@ -86,6 +86,7 @@ class CommandsListener extends Command
                     $args = preg_split('~(\s+|/|@)~', trim($command->getMessage()->getText(), '/'));
 
                     switch ($args[0]) {
+                        case 'h':
                         case 'help':
                             $message = '<b>Available commands list:</b>' . PHP_EOL
                                 . '/ping - check bot heartbeat' . PHP_EOL
@@ -100,6 +101,7 @@ class CommandsListener extends Command
                             $message = 'pong';
                             break;
 
+                        case 'm':
                         case 'markets':
                             $message = '';
                             $result = json_decode($marketsApi->call($args), true);
@@ -108,6 +110,7 @@ class CommandsListener extends Command
                             }
                             break;
 
+                        case 'o':
                         case 'orders':
                             if (isset($args[1])) {
                                 $message = [];
@@ -133,20 +136,24 @@ class CommandsListener extends Command
                             }
                             break;
 
-                        case 'balance':
+                        case 'b':
                         case 'balances':
                             if (isset($args[1])) {
                                 $message = [];
                                 $result = json_decode($marketsApi->call($args), true);
-                                foreach ($result['data']['total'] as $symbol => $amount) {
-                                    if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
-                                        continue;
+                                if ($result['success']) {
+                                    foreach ($result['data']['total'] as $symbol => $amount) {
+                                        if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
+                                            continue;
+                                        }
+                                        $message[] = [
+                                            'symbol' => $symbol,
+                                            'total' => sprintf('%.8f', $amount),
+                                            'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
+                                        ];
                                     }
-                                    $message[] = [
-                                        'symbol' => $symbol,
-                                        'total' => sprintf('%.8f', $amount),
-                                        'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
-                                    ];
+                                } else {
+                                    $message = $result['message'];
                                 }
                             } else {
                                 $message = '';
