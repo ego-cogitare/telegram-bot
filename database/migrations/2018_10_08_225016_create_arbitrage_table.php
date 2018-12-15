@@ -16,7 +16,7 @@ class CreateArbitrageTable extends Migration
      */
     public function up()
     {
-        Schema::create('arbitrage', function (Blueprint $table) {
+        Schema::connection('arbitrage')->create('arbitrage', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamp('created_at')->useCurrent();
             $table->string('triplet', 16)->index();
@@ -34,6 +34,6 @@ class CreateArbitrageTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('arbitrage');
+        Schema::connection('arbitrage')->dropIfExists('arbitrage');
     }
 }

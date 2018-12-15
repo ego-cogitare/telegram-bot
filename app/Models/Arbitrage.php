@@ -12,6 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 class Arbitrage extends Model
 {
     /**
+     * @var string
+     */
+    protected $connection = 'arbitrage';
+
+    /**
      * @var array
      */
     protected $fillable = [

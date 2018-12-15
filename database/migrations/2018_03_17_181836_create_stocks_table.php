@@ -16,7 +16,7 @@ class CreateStocksTable extends Migration
      */
     public function up()
     {
-        Schema::create('stocks', function (Blueprint $table) {
+        Schema::connection('arbitrage')->create('stocks', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamp('created_at')->useCurrent();
             $table->string('name');
@@ -30,6 +30,6 @@ class CreateStocksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('stocks');
+        Schema::connection('arbitrage')->dropIfExists('stocks');
     }
 }
