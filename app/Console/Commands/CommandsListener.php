@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Longman\TelegramBot\Exception\TelegramException;
-use Longman\TelegramBot\Telegram;
 use TelegramBot\TelegramBotManager\BotManager;
 use TelegramBot\TelegramBotManager\Exception\InvalidActionException;
 use TelegramBot\TelegramBotManager\Exception\InvalidParamsException;

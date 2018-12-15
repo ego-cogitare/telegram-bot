@@ -10,12 +10,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\Telegram;
+use App\Models\Arbitrage as Model;
 
 /**
- * Class TelegramMessageJob
+ * Class TripletLogJob
  * @package App\Jobs
  */
-class TelegramMessageJob implements ShouldQueue
+class TripletLogJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -38,9 +39,19 @@ class TelegramMessageJob implements ShouldQueue
      */
     public function handle(Telegram $telegram)
     {
+        /** Send message to telegram */
         $result = Request::sendMessage([
             'chat_id' => env('TELEGRAM_BOT_CHAT_ID'),
-            'text' => $this->payload['message'],
+            'text' => $this->payload['log'],
+        ]);
+
+        /** Save found triplet information */
+        Model::create([
+            'triplet' => $this->payload['triplet'],
+            'stock_id' => $this->payload['stock_id'],
+            'profit' => $this->payload['profit'],
+            'profit_quote' => $this->payload['profit_quote'],
+            'bet' => $this->payload['bet'],
         ]);
 
         if ($result->isOk()) {
