@@ -153,7 +153,7 @@ class CommandsListener extends Command
                                         foreach ($result['data'] as $symbol => $amount) {
                                             $message[] = [
                                                 'symbol' => $symbol,
-                                                'amount' => sprintf('%.8f', $amount),
+                                                'amount' => $amount,
                                             ];
                                         }
                                     } else {
