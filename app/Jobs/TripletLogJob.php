@@ -40,10 +40,12 @@ class TripletLogJob implements ShouldQueue
     public function handle(Telegram $telegram)
     {
         /** Send message to telegram */
-        $result = Request::sendMessage([
-            'chat_id' => env('TELEGRAM_BOT_CHAT_ID'),
-            'text' => $this->payload['log'],
-        ]);
+        if ($this->payload['notify']) {
+            $result = Request::sendMessage([
+                'chat_id' => env('TELEGRAM_BOT_CHAT_ID'),
+                'text' => $this->payload['log'],
+            ]);
+        }
 
         /** Save found triplet information */
         Model::create([
