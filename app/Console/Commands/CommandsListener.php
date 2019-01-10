@@ -93,7 +93,8 @@ class CommandsListener extends Command
                                 . '/markets - get markets list' . PHP_EOL
                                 . '/convert market - show all existing funds converted to each available quote coin' . PHP_EOL
                                 . '/balances market - get all balances for specified market' . PHP_EOL
-                                . '/orders active|history amount - get list of active or last N orders' . PHP_EOL;
+                                . '/orders active|history amount - get list of active or last N orders' . PHP_EOL
+                                . '/cancel market [all|buy|sell|base/quote] - cancel orders' . PHP_EOL;
                             break;
 
                         case 'ping':
@@ -200,6 +201,26 @@ class CommandsListener extends Command
                                 foreach ($result['data'] as $market) {
                                     $message .= sprintf("/balances@%s\n", $market);
                                 }
+                            }
+                            break;
+
+                        case 'x':
+                        case 'cancel':
+                            $message = [];
+                            try {
+                                $result = json_decode($marketsApi->call($args), true);
+                                if ($result['success']) {
+                                    foreach ($result['data'] as $row) {
+                                        $message[] = [
+                                            'id' => $row['id'],
+                                            'symbol' => $row['symbol'],
+                                        ];
+                                    }
+                                } else {
+                                    $message = '#error' . PHP_EOL . implode(PHP_EOL, $result['errors']);
+                                }
+                            } catch (\Exception $e) {
+                                $message = '#error' . PHP_EOL . $e->getMessage();
                             }
                             break;
 
