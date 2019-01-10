@@ -45,6 +45,12 @@ class TripletLogJob implements ShouldQueue
                 'chat_id' => env('TELEGRAM_BOT_CHAT_ID'),
                 'text' => $this->payload['log'],
             ]);
+
+            if ($result->isOk()) {
+                echo 'Message sent successfully';
+            } else {
+                echo 'Sorry message not sent';
+            }
         }
 
         /** Save found triplet information */
@@ -55,11 +61,5 @@ class TripletLogJob implements ShouldQueue
             'profit_quote' => $this->payload['profit_quote'],
             'bet' => $this->payload['bet'],
         ]);
-
-        if ($result->isOk()) {
-            echo 'Message sent successfully';
-        } else {
-            echo 'Sorry message not sent';
-        }
     }
 }
