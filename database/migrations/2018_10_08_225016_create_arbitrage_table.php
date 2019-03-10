@@ -24,6 +24,7 @@ class CreateArbitrageTable extends Migration
             $table->decimal('profit', 5, 2);
             $table->decimal('profit_quote', 15, 2);
             $table->decimal('bet', 15, 2);
+            $table->boolean('notify')->default(0);
         });
     }
 

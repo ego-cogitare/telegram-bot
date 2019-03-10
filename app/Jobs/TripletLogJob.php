@@ -60,6 +60,7 @@ class TripletLogJob implements ShouldQueue
             'profit' => $this->payload['profit'],
             'profit_quote' => $this->payload['profit_quote'],
             'bet' => $this->payload['bet'],
+            'notify' => boolval($this->payload['notify']),
         ]);
     }
 }

@@ -25,6 +25,7 @@ class Arbitrage extends Model
         'profit',
         'profit_quote',
         'bet',
+        'notify',
     ];
 
     /**
