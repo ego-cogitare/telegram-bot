@@ -79,8 +79,14 @@ class CommandsListener extends Command
                 'database' => env('DB_DATABASE'),
             ]);
             $bot->setCustomGetUpdatesCallback(function ($updates) use ($marketsApi) {
-                /** @var \Longman\TelegramBot\Entities\ServerResponse $updates */
-                foreach ($updates->getResult() as $command) {
+                /** @var \Longman\TelegramBot\Entities\ServerResponse $results */
+		$results = $updates->getResult();
+
+		if (gettype($results) !== 'array') {
+		     return '';
+		}
+
+                foreach ($results as $command) {
                     /** @var \Longman\TelegramBot\Entities\Update $command */
                     $args = preg_split('~(\s+|/|@)~', trim($command->getMessage()->getText(), '/'));
 
