@@ -41,7 +41,11 @@ class MarketsApi implements IMarketsApi
         }
 
         /** @var string|json $result */
-        $result = file_get_contents(sprintf('%s/api/%s', $this->apiUrl, implode('/', $payload)));
+        $result = file_get_contents(
+            sprintf('%s/api/%s', $this->apiUrl, implode('/', $payload)),
+            false,
+            stream_context_create(['http' => ['ignore_errors' => true]])
+        );
 
         return $result;
     }

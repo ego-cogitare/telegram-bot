@@ -80,11 +80,11 @@ class CommandsListener extends Command
             ]);
             $bot->setCustomGetUpdatesCallback(function ($updates) use ($marketsApi) {
                 /** @var \Longman\TelegramBot\Entities\ServerResponse $results */
-		$results = $updates->getResult();
+                $results = $updates->getResult();
 
-		if (gettype($results) !== 'array') {
-		     return '';
-		}
+                if (gettype($results) !== 'array') {
+                     return '';
+                }
 
                 foreach ($results as $command) {
                     /** @var \Longman\TelegramBot\Entities\Update $command */
@@ -154,20 +154,16 @@ class CommandsListener extends Command
                         case 'convert':
                             if (isset($args[1])) {
                                 $message = [];
-                                try {
-                                    $result = json_decode($marketsApi->call($args), true);
-                                    if ($result['success']) {
-                                        foreach ($result['data'] as $symbol => $amount) {
-                                            $message[] = [
-                                                'symbol' => $symbol,
-                                                'amount' => $amount,
-                                            ];
-                                        }
-                                    } else {
-                                        $message = $result['message'];
+                                $result = json_decode($marketsApi->call($args), true);
+                                if ($result['success']) {
+                                    foreach ($result['data'] as $symbol => $amount) {
+                                        $message[] = [
+                                            'symbol' => $symbol,
+                                            'amount' => $amount,
+                                        ];
                                     }
-                                } catch (\Exception $e) {
-                                    $message = '#error' . PHP_EOL . $e->getMessage();
+                                } else {
+                                    $message = '#error' . PHP_EOL . $result['message'];
                                 }
                             } else {
                                 $message = '';
@@ -182,24 +178,20 @@ class CommandsListener extends Command
                         case 'balances':
                             if (isset($args[1])) {
                                 $message = [];
-                                try {
-                                    $result = json_decode($marketsApi->call($args), true);
-                                    if ($result['success']) {
-                                        foreach ($result['data']['total'] as $symbol => $amount) {
-                                            if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
-                                                continue;
-                                            }
-                                            $message[] = [
-                                                'symbol' => $symbol,
-                                                'total' => sprintf('%.8f', $amount),
-                                                'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
-                                            ];
+                                $result = json_decode($marketsApi->call($args), true);
+                                if ($result['success']) {
+                                    foreach ($result['data']['total'] as $symbol => $amount) {
+                                        if ($amount == 0 && $result['data']['used'][$symbol] == 0) {
+                                            continue;
                                         }
-                                    } else {
-                                        $message = $result['message'];
+                                        $message[] = [
+                                            'symbol' => $symbol,
+                                            'total' => sprintf('%.8f', $amount),
+                                            'in_orders' => sprintf('%.8f', $result['data']['used'][$symbol]),
+                                        ];
                                     }
-                                } catch (\Exception $e) {
-                                    $message = '#error' . PHP_EOL . $e->getMessage();
+                                } else {
+                                    $message = '#error' . PHP_EOL . $result['message'];
                                 }
                             } else {
                                 $message = '';
