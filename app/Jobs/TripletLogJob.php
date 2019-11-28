@@ -53,6 +53,18 @@ class TripletLogJob implements ShouldQueue
             }
         }
 
+        /**
+         * Triplet processing progress:
+         *  0 - means first operation was not processed
+         *  1 - second operation was not processed but first is
+         *  2 - only 3rd operation was no processed
+         *  3 - all operations were processed
+         */
+        $progress = 0;
+        foreach ($this->payload['process_log'] as $stepLog) {
+            $progress += intval($stepLog['succeed']);
+        }
+
         /** Save found triplet information */
         Model::create([
             'triplet' => $this->payload['triplet'],
@@ -61,6 +73,7 @@ class TripletLogJob implements ShouldQueue
             'profit_quote' => $this->payload['profit_quote'],
             'bet' => $this->payload['bet'],
             'notify' => boolval($this->payload['notify']),
+            'progress' => $progress,
         ]);
     }
 }
