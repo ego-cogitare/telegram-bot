@@ -21,6 +21,9 @@ class Arbitrage extends Model
      */
     protected $fillable = [
         'triplet',
+        'time_start',
+        'time_end',
+        'time_delay',
         'stock_id',
         'profit',
         'profit_quote',
@@ -38,7 +41,7 @@ class Arbitrage extends Model
      * @var bool
      */
     public $timestamps = false;
-    
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
