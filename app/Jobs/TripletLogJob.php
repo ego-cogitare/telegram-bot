@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Longman\TelegramBot\Request;
 use Longman\TelegramBot\Telegram;
 use App\Models\Arbitrage as Model;
+use Log;
 
 /**
  * Class TripletLogJob
@@ -39,6 +40,8 @@ class TripletLogJob implements ShouldQueue
      */
     public function handle(Telegram $telegram)
     {
+        Log::debug('incoming payload', $this->payload);
+
         /** Send message to telegram */
         if ($this->payload['notify']) {
             $result = Request::sendMessage([
