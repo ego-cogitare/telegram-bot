@@ -80,6 +80,7 @@ class TripletLogJob implements ShouldQueue
             'bet' => $this->payload['bet'],
             'notify' => boolval($this->payload['notify']),
             'progress' => $progress,
+            'error' => $this->payload['error'] ?? '',
         ]);
     }
 }

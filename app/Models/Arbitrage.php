@@ -30,6 +30,7 @@ class Arbitrage extends Model
         'bet',
         'notify',
         'progress',
+        'error',
     ];
 
     /**
