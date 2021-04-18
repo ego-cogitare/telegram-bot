@@ -72,7 +72,6 @@ class TripletLogJob implements ShouldQueue
         Model::create([
             'triplet' => $this->payload['triplet'],
             'time_start' => $this->payload['time_start'] ?? 0,
-            'time_end' => $this->payload['time_end'] ?? 0,
             'time_delay' => $this->payload['time_delay'] ?? 0,
             'stock_id' => $this->payload['stock_id'],
             'profit' => $this->payload['profit'],

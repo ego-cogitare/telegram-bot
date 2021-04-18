@@ -22,7 +22,6 @@ class Arbitrage extends Model
     protected $fillable = [
         'triplet',
         'time_start',
-        'time_end',
         'time_delay',
         'stock_id',
         'profit',
