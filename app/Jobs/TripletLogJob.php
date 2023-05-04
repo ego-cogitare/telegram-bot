@@ -73,6 +73,7 @@ class TripletLogJob implements ShouldQueue
             'triplet' => $this->payload['triplet'],
             'time_start' => $this->payload['time_start'] ?? time() * 1000,
             'time_delay' => $this->payload['time_delay'] ?? 0,
+            'fod' => $this->payload['fod'] ?? 0,
             'stock_id' => $this->payload['stock_id'],
             'profit' => $this->payload['profit'],
             'profit_quote' => $this->payload['profit_quote'],
