@@ -23,6 +23,7 @@ class Arbitrage extends Model
         'triplet',
         'time_start',
         'time_delay',
+        'fod',
         'stock_id',
         'profit',
         'profit_quote',
