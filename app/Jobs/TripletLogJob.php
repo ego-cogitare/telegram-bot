@@ -52,7 +52,7 @@ class TripletLogJob implements ShouldQueue
             if ($result->isOk()) {
                 echo 'Message sent successfully';
             } else {
-                echo 'Sorry message not sent';
+                echo 'Fail: ', $result->getDescription();
             }
         }
 
