@@ -40,7 +40,7 @@ class MessageSend extends Command
         if ($result->isOk()) {
             echo 'Message sent successfully';
         } else {
-            echo 'Sorry message not sent to: ';
+            echo 'Fail: ', $result->getDescription();
         }
     }
 }
